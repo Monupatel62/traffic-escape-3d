@@ -70,3 +70,11 @@ test("service worker installs and the app shell remains available offline", asyn
   await expect(page.locator("#game-canvas canvas")).toBeVisible();
   await context.setOffline(false);
 });
+
+test("hint provides a legal next-step instruction without moving a vehicle", async ({ page }) => {
+  await page.goto("/");
+  const status = page.locator("#status-message");
+  await page.locator("#hint-button").click();
+  await expect(status).toContainText(/^Hint: slide the .+ one space (forward|backward)\.$/);
+  await expect(page.locator("#move-count")).toHaveText("0");
+});
