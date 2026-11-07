@@ -52,6 +52,19 @@ test("service worker installs and the app shell remains available offline", asyn
     await navigator.serviceWorker.ready;
   });
   await expect.poll(() => page.evaluate(() => navigator.serviceWorker.controller !== null)).toBe(true);
+  const precache = await page.evaluate(async () => {
+    const manifest = await fetch("/manifest.json").then(response => response.json());
+    const jsAssets = Object.values(manifest).map((entry: any) => entry.file as string).filter(file => file.endsWith(".js"));
+    const cacheNames = await caches.keys();
+    const cachedAssets: string[] = [];
+    for (const name of cacheNames) {
+      const cache = await caches.open(name);
+      for (const asset of jsAssets) if (await cache.match(`/${asset.replace(/^\\//, "")}`)) cachedAssets.push(asset);
+    }
+    return { jsAssets, cachedAssets };
+  });
+  expect(precache.jsAssets.length).toBeGreaterThan(0);
+  expect(precache.cachedAssets.length).toBe(precache.jsAssets.length);
   await context.setOffline(true);
   await page.reload();
   await expect(page.locator("#game-canvas canvas")).toBeVisible();
