@@ -587,3 +587,6 @@ function resetLevel(): void {
   setStatus("Drag a vehicle to move it");
 }
 
+
+// Populate the level/world selector on the initial page load.
+renderLevelPicker();
