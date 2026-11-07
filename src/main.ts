@@ -121,6 +121,8 @@ let dragMoved = false;
 let moves = 0;
 let history: Snapshot[] = [];
 let completed = false;
+let paused = false;
+const pauseModal = document.querySelector<HTMLDivElement>("#pause-modal")!;
 const moveAnimations = new Map<string, { from: THREE.Vector3; to: THREE.Vector3; startedAt: number; duration: number }>();
 
 function worldPosition(v: Vehicle): THREE.Vector3 {
@@ -233,6 +235,7 @@ function finishIfSolved(): void {
 }
 
 function moveVehicle(v: Vehicle, axisPosition: number): boolean {
+  if (paused || completed) return false;
   const next = Math.round(axisPosition);
   const x = v.axis === "horizontal" ? next : v.x;
   const y = v.axis === "vertical" ? next : v.y;
@@ -263,7 +266,7 @@ function moveVehicle(v: Vehicle, axisPosition: number): boolean {
 }
 
 function pickVehicle(event: PointerEvent): void {
-  if (completed) return;
+  if (completed || paused) return;
   const rect = renderer.domElement.getBoundingClientRect();
   pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
   pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
@@ -296,7 +299,7 @@ function pickVehicle(event: PointerEvent): void {
 }
 
 function dragVehicle(event: PointerEvent): void {
-  if (!selectedId) return;
+  if (paused || !selectedId) return;
   const rect = renderer.domElement.getBoundingClientRect();
   pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
   pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
@@ -320,6 +323,7 @@ function dragVehicle(event: PointerEvent): void {
 
 function releaseVehicle(): void {
   if (!selectedId) return;
+  if (paused) { selectedId = null; return; }
   const v = vehicles.find(item => item.id === selectedId);
   if (v && dragMoved) {
     const mesh = meshes.get(selectedId);
@@ -340,6 +344,7 @@ renderer.domElement.addEventListener("pointerup", releaseVehicle);
 renderer.domElement.addEventListener("pointercancel", releaseVehicle);
 
 renderer.domElement.addEventListener("keydown", (event: KeyboardEvent) => {
+  if (paused) return;
   if (event.key === "Escape") {
     keyboardSelectedId = null;
     updateVehicleSelection();
@@ -416,6 +421,30 @@ document.querySelector<HTMLButtonElement>("#undo-button")!.addEventListener("cli
   setStatus("Last move undone");
 });
 document.querySelector<HTMLButtonElement>("#reset-button")!.addEventListener("click", resetLevel);
+function setPaused(value: boolean): void {
+  if (completed && value) return;
+  paused = value;
+  selectedId = null;
+  keyboardSelectedId = null;
+  moveAnimations.clear();
+  if (paused) {
+    rebuildVehicles();
+    pauseModal.classList.remove("hidden");
+    setStatus("Game paused");
+  } else {
+    pauseModal.classList.add("hidden");
+    setStatus("Game resumed — clear the road");
+  }
+}
+document.querySelector<HTMLButtonElement>("#pause-button")!.addEventListener("click", () => setPaused(true));
+document.querySelector<HTMLButtonElement>("#resume-button")!.addEventListener("click", () => setPaused(false));
+document.querySelector<HTMLButtonElement>("#pause-restart-button")!.addEventListener("click", () => {
+  setPaused(false);
+  resetLevel();
+});
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden && !completed && !paused) setPaused(true);
+});
 const settingsModal = document.querySelector<HTMLDivElement>("#settings-modal")!;
 const soundToggle = document.querySelector<HTMLInputElement>("#sound-toggle")!;
 const musicToggle = document.querySelector<HTMLInputElement>("#music-toggle")!;
@@ -437,6 +466,7 @@ soundToggle.addEventListener("change", updateAudioSettings);
 musicToggle.addEventListener("change", updateAudioSettings);
 document.addEventListener("keydown", event => {
   if (event.key === "Escape" && !settingsModal.classList.contains("hidden")) settingsModal.classList.add("hidden");
+  else if (event.key === "Escape" && paused) setPaused(false);
 });
 document.querySelector<HTMLButtonElement>("#replay-button")!.addEventListener("click", resetLevel);
 document.querySelector<HTMLButtonElement>("#next-button")!.addEventListener("click", () => {
@@ -515,6 +545,8 @@ function renderLevelPicker(): void {
 }
 
 function resetLevel(): void {
+  paused = false;
+  pauseModal.classList.add("hidden");
   moveAnimations.clear();
   selectedId = null;
   keyboardSelectedId = null;
