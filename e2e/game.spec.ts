@@ -2,19 +2,18 @@ import { expect, test } from "@playwright/test";
 import * as THREE from "three";
 
 async function projectBoardPoint(page: import("@playwright/test").Page, worldX: number, worldZ: number) {
-  return page.locator("#game-canvas canvas").evaluate((canvas, point) => {
-    const rect = canvas.getBoundingClientRect();
-    const aspect = rect.width / Math.max(rect.height, 1);
-    const camera = new THREE.OrthographicCamera(-3.4 * aspect, 3.4 * aspect, 3.4, -3.4, 0.1, 100);
-    camera.position.set(8, 10, 9);
-    camera.lookAt(0, 0, 0);
-    camera.updateProjectionMatrix();
-    const projected = new THREE.Vector3(point.x, 0.31, point.z).project(camera);
-    return {
-      x: rect.left + (projected.x + 1) * rect.width / 2,
-      y: rect.top + (1 - projected.y) * rect.height / 2
-    };
-  }, { x: worldX, z: worldZ });
+  const rect = await page.locator("#game-canvas canvas").boundingBox();
+  if (!rect) throw new Error("Game canvas has no layout box");
+  const aspect = rect.width / Math.max(rect.height, 1);
+  const camera = new THREE.OrthographicCamera(-3.4 * aspect, 3.4 * aspect, 3.4, -3.4, 0.1, 100);
+  camera.position.set(8, 10, 9);
+  camera.lookAt(0, 0, 0);
+  camera.updateProjectionMatrix();
+  const projected = new THREE.Vector3(worldX, 0.31, worldZ).project(camera);
+  return {
+    x: rect.x + (projected.x + 1) * rect.width / 2,
+    y: rect.y + (1 - projected.y) * rect.height / 2
+  };
 }
 
 test("loads the game board and primary controls", async ({ page }) => {
