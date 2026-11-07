@@ -21,6 +21,8 @@ type Snapshot = { vehicles: Vehicle[]; moves: number };
 const GRID = 6;
 const CELL = 1;
 let activeLevelId = 1;
+let activeWorld = 1;
+const worldNames: Record<number, string> = { 1: "City Streets", 2: "Busy Roads", 3: "Highway Rush", 4: "Downtown", 5: "Ultimate Traffic" };
 let activeLevel = getLevel(activeLevelId)!;
 let progress = loadProgress();
 const audio = new GameAudio(loadAudioSettings());
@@ -501,12 +503,13 @@ function selectLevel(levelId: number): void {
   const level = getLevel(levelId);
   if (!level || levelId > progress.highestUnlockedLevel) return;
   activeLevelId = levelId;
+  activeWorld = level.world;
   activeLevel = level;
   initialVehicles = vehiclesForLevel(levelId);
   const number = document.querySelector<HTMLElement>("#level-number");
   if (number) number.textContent = String(levelId).padStart(2, "0");
   const meta = document.querySelector<HTMLElement>(".level-meta");
-  if (meta) meta.innerHTML = `<span class="level-dot"></span><span>WORLD ${level.world} — CITY STREETS</span><span class="difficulty">${level.difficulty.toUpperCase()}</span>`;
+  if (meta) meta.innerHTML = `<span class="level-dot"></span><span>WORLD ${level.world} — ${worldNames[level.world] ?? "TRAFFIC"}</span><span class="difficulty">${level.difficulty.toUpperCase()}</span>`;
   const title = document.querySelector<HTMLElement>(".intro h1");
   if (title) title.innerHTML = `${level.title}<br /><span>Find your way out.</span>`;
   renderLevelPicker();
@@ -515,9 +518,31 @@ function selectLevel(levelId: number): void {
 
 function renderLevelPicker(): void {
   const picker = document.querySelector<HTMLDivElement>("#level-picker");
+  const selector = document.querySelector<HTMLDivElement>("#world-selector");
   if (!picker) return;
+  if (selector) {
+    selector.replaceChildren();
+    for (let world = 1; world <= 5; world++) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "world-tab";
+      button.textContent = `World ${world}`;
+      const firstLevel = (world - 1) * 20 + 1;
+      const hasLevels = LEVELS.some(level => level.world === world);
+      const unlocked = hasLevels && progress.highestUnlockedLevel >= firstLevel;
+      button.disabled = !unlocked;
+      if (world === activeWorld) button.classList.add("selected");
+      button.setAttribute("aria-label", `${worldNames[world]}, ${unlocked ? "available" : "locked"}`);
+      if (unlocked) button.addEventListener("click", () => {
+        activeWorld = world;
+        renderLevelPicker();
+      });
+      selector.append(button);
+    }
+  }
   picker.replaceChildren();
-  for (let id = 1; id <= 20; id++) {
+  const first = (activeWorld - 1) * 20 + 1;
+  for (let id = first; id < first + 20; id++) {
     const level = getLevel(id);
     const button = document.createElement("button");
     button.type = "button";
@@ -538,10 +563,12 @@ function renderLevelPicker(): void {
     }
     picker.append(button);
   }
+  const heading = document.querySelector<HTMLElement>(".progress-heading span");
+  if (heading) heading.textContent = `WORLD ${activeWorld} · ${worldNames[activeWorld] ?? "TRAFFIC"}`;
   const count = document.querySelector<HTMLElement>("#level-count");
-  if (count) count.textContent = `${LEVELS.length} playable`;
+  if (count) count.textContent = `${LEVELS.filter(level => level.world === activeWorld).length} playable`;
   const note = document.querySelector<HTMLElement>("#level-picker-note");
-  if (note) note.textContent = `${LEVELS.length} of 100 planned levels are playable. Locked levels open as they are added and tested.`;
+  if (note) note.textContent = `${LEVELS.length} of 100 planned levels are playable. Complete level 20 to unlock Busy Roads.`;
 }
 
 function resetLevel(): void {
