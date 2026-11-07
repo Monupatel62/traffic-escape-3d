@@ -85,7 +85,7 @@ const extraLevels: LevelDefinition[] = extraLevelTitles.map((title, index) => {
     id: `v${blockerIndex}`,
     x: firstColumn + blockerIndex,
     y: blockerRow,
-    length: blockerLength,
+    length: 2,
     axis: "vertical"
   }));
   return {
@@ -138,7 +138,7 @@ const busyRoadLevels: LevelDefinition[] = busyRoadTitles.map((title, index) => {
     id: `v${blockerIndex}`,
     x: firstColumn + blockerIndex,
     y: blockerRow,
-    length: 2,
+    length: blockerLength,
     axis: "vertical"
   }));
   const topCarX = (index % 3) * 2;
