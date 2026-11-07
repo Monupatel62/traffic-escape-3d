@@ -293,7 +293,7 @@ const ultimateTrafficLevels: LevelDefinition[] = ultimateTrafficTitles.map((titl
   const group = Math.floor(index / 4);
   const firstColumn = (index * 3 + group * 2) % 4;
   const blockerRow = [0, 1, 3, 4, 0][group];
-  const blockerLength = blockerRow === 4 ? 2 : group % 2 === 0 ? 3 : 2;
+  const blockerLength = blockerRow === 4 || group === 4 ? 2 : group % 2 === 0 ? 3 : 2;
   const blockers: PuzzleVehicle[] = Array.from({ length: blockerCount }, (_, blockerIndex) => ({
     id: `v${blockerIndex}`,
     x: 2 + ((firstColumn + blockerIndex) % 4),
