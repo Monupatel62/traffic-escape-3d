@@ -337,6 +337,7 @@ renderer.domElement.addEventListener("pointercancel", releaseVehicle);
 renderer.domElement.addEventListener("keydown", (event: KeyboardEvent) => {
   if (event.key === "Escape") {
     keyboardSelectedId = null;
+    updateVehicleSelection();
     setStatus("Vehicle selection cleared");
     return;
   }
@@ -400,6 +401,7 @@ animate();
 document.querySelector<HTMLButtonElement>("#undo-button")!.addEventListener("click", () => {
   const previous = history.pop();
   if (!previous) { setStatus("No move to undo yet"); return; }
+  moveAnimations.clear();
   vehicles = previous.vehicles;
   moves = previous.moves;
   completed = false;
@@ -486,6 +488,9 @@ function renderLevelPicker(): void {
 }
 
 function resetLevel(): void {
+  moveAnimations.clear();
+  selectedId = null;
+  keyboardSelectedId = null;
   vehicles = structuredClone(initialVehicles);
   moves = 0;
   history = [];
