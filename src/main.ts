@@ -8,6 +8,7 @@ if ("serviceWorker" in navigator) {
 
 import * as THREE from "three";
 import "./style.css";
+import { canPlaceVehicle } from "./game/rules";
 
 type Axis = "horizontal" | "vertical";
 type Vehicle = { id: string; name: string; x: number; y: number; length: number; axis: Axis; color: string; target?: boolean };
@@ -139,27 +140,8 @@ function rebuildVehicles(): void {
   }
 }
 
-function occupiedByOther(v: Vehicle, x: number, y: number): boolean {
-  return vehicles.some(other => {
-    if (other.id === v.id) return false;
-    for (let i = 0; i < other.length; i++) {
-      const ox = other.axis === "horizontal" ? other.x + i : other.x;
-      const oy = other.axis === "vertical" ? other.y + i : other.y;
-      for (let j = 0; j < v.length; j++) {
-        const vx = v.axis === "horizontal" ? x + j : x;
-        const vy = v.axis === "vertical" ? y + j : y;
-        if (ox === vx && oy === vy) return true;
-      }
-    }
-    return false;
-  });
-}
-
 function canPlace(v: Vehicle, x: number, y: number): boolean {
-  if (v.axis === "horizontal") {
-    if (y !== v.y || x < 0 || x + v.length > GRID) return false;
-  } else if (x !== v.x || y < 0 || y + v.length > GRID) return false;
-  return !occupiedByOther(v, x, y);
+  return canPlaceVehicle(v, x, y, vehicles, GRID);
 }
 
 function setStatus(message: string): void { statusMessage.textContent = message; }
