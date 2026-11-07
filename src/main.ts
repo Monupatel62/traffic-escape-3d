@@ -53,6 +53,8 @@ camera.lookAt(0, 0, 0);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.domElement.tabIndex = 0;
+renderer.domElement.setAttribute("aria-label", "Select a vehicle, then use arrow keys to move it. Press Escape to clear selection.");
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
