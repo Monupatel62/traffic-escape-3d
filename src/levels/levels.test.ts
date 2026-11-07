@@ -9,7 +9,7 @@ describe("level catalog", () => {
   });
   it("contains twenty distinct playable puzzles for World 1", () => {
     expect(LEVELS).toHaveLength(20);
-    expect(new Set(LEVELS.map(level => JSON.stringify(level.vehicles))).size).toBe(6);
+    expect(new Set(LEVELS.map(level => JSON.stringify(level.vehicles))).size).toBe(20);
   });
   it("returns undefined for unknown levels", () => expect(getLevel(999)).toBeUndefined());
 });
