@@ -119,6 +119,7 @@ let dragMoved = false;
 let moves = 0;
 let history: Snapshot[] = [];
 let completed = false;
+const moveAnimations = new Map<string, { from: THREE.Vector3; to: THREE.Vector3; startedAt: number; duration: number }>();
 
 function worldPosition(v: Vehicle): THREE.Vector3 {
   const position = vehicleWorldPosition(v);
@@ -130,7 +131,9 @@ function makeVehicle(v: Vehicle): THREE.Group {
   group.userData.vehicleId = v.id;
   const width = v.axis === "horizontal" ? v.length * 0.88 : 0.72;
   const depth = v.axis === "horizontal" ? 0.72 : v.length * 0.88;
-  const body = new THREE.Mesh(new THREE.BoxGeometry(width, 0.48, depth), new THREE.MeshStandardMaterial({ color: v.color, roughness: 0.34, metalness: 0.12 }));
+  const bodyMaterial = new THREE.MeshStandardMaterial({ color: v.color, roughness: 0.34, metalness: 0.12 });
+  const body = new THREE.Mesh(new THREE.BoxGeometry(width, 0.48, depth), bodyMaterial);
+  group.userData.bodyMaterial = bodyMaterial;
   body.position.y = 0.31;
   body.castShadow = true;
   body.receiveShadow = true;
@@ -184,6 +187,24 @@ function rebuildVehicles(): void {
     vehicleGroup.add(mesh);
     meshes.set(v.id, mesh);
   }
+  updateVehicleSelection();
+}
+
+function updateVehicleSelection(): void {
+  for (const [id, mesh] of meshes) {
+    const material = mesh.userData.bodyMaterial as THREE.MeshStandardMaterial | undefined;
+    if (!material) continue;
+    const isSelected = id === (selectedId ?? keyboardSelectedId);
+    material.emissive.set(isSelected ? "#18c99b" : "#000000");
+    material.emissiveIntensity = isSelected ? 0.42 : 0;
+  }
+}
+
+function animateVehicleMove(id: string, from: THREE.Vector3, to: THREE.Vector3): void {
+  const mesh = meshes.get(id);
+  if (!mesh || from.distanceToSquared(to) < 0.0001) return;
+  mesh.position.copy(from);
+  moveAnimations.set(id, { from: from.clone(), to: to.clone(), startedAt: performance.now(), duration: 150 });
 }
 
 function canPlace(v: Vehicle, x: number, y: number): boolean {
@@ -225,11 +246,14 @@ function moveVehicle(v: Vehicle, axisPosition: number): boolean {
     return true;
   }
   if (!canSlideVehicle(v, next, vehicles, GRID)) return false;
+  const currentMesh = meshes.get(v.id);
+  const from = currentMesh?.position.clone() ?? worldPosition(v);
   saveSnapshot();
   v.x = x; v.y = y;
   moves++;
   renderMoveCount();
   rebuildVehicles();
+  animateVehicleMove(v.id, from, worldPosition(v));
   return true;
 }
 
@@ -263,6 +287,7 @@ function pickVehicle(event: PointerEvent): void {
   setStatus(v.target ? "Move the red car toward the exit" : "Slide along the vehicle's lane");
   const mesh = meshes.get(id);
   if (mesh) mesh.position.y = 0.34;
+  updateVehicleSelection();
 }
 
 function dragVehicle(event: PointerEvent): void {
@@ -356,6 +381,18 @@ rebuildVehicles();
 
 function animate(): void {
   requestAnimationFrame(animate);
+  const now = performance.now();
+  for (const [id, animation] of moveAnimations) {
+    const mesh = meshes.get(id);
+    if (!mesh) {
+      moveAnimations.delete(id);
+      continue;
+    }
+    const rawProgress = Math.min(1, (now - animation.startedAt) / animation.duration);
+    const eased = 1 - Math.pow(1 - rawProgress, 3);
+    mesh.position.lerpVectors(animation.from, animation.to, eased);
+    if (rawProgress >= 1) moveAnimations.delete(id);
+  }
   renderer.render(scene, camera);
 }
 animate();
