@@ -7,9 +7,9 @@ describe("level catalog", () => {
     expect(validateLevelCatalog()).toEqual([]);
     expect(getLevel(1)).toBe(LEVELS[0]);
   });
-  it("contains three distinct playable puzzles", () => {
-    expect(LEVELS).toHaveLength(3);
-    expect(new Set(LEVELS.map(level => JSON.stringify(level.vehicles))).size).toBe(3);
+  it("contains six distinct playable puzzles", () => {
+    expect(LEVELS).toHaveLength(6);
+    expect(new Set(LEVELS.map(level => JSON.stringify(level.vehicles))).size).toBe(6);
   });
   it("returns undefined for unknown levels", () => expect(getLevel(999)).toBeUndefined());
 });
