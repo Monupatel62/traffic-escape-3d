@@ -100,7 +100,7 @@ test("undo and restart controls handle an untouched level safely", async ({ page
   const status = page.locator("#status-message");
   await page.locator("#undo-button").click();
   await expect(status).toHaveText("No move to undo yet");
-  await page.locator("#restart-button").click();
+  await page.locator("#reset-button").click();
   await expect(page.locator("#move-count")).toHaveText("0");
   await expect(status).toHaveText("Drag a vehicle to move it");
 });
