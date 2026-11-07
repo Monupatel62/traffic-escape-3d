@@ -1,3 +1,11 @@
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch((error: unknown) => {
+      console.warn("Offline support could not be enabled:", error);
+    });
+  });
+}
+
 import * as THREE from "three";
 import "./style.css";
 
