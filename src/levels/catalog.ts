@@ -240,7 +240,7 @@ const downtownLevels: LevelDefinition[] = downtownTitles.map((title, index) => {
   const blockerCount = 1 + (index % 4);
   const group = Math.floor(index / 4);
   const firstColumn = (index * 3 + group) % 4;
-  const blockerRow = [0, 1, 2, 1, 0][group];
+  const blockerRow = [0, 1, 2, 1, 2][group];
   const blockerLength = blockerRow === 0 ? 3 : group % 2 === 0 ? 2 : 3;
   const blockers: PuzzleVehicle[] = Array.from({ length: blockerCount }, (_, blockerIndex) => ({
     id: `v${blockerIndex}`,
@@ -292,7 +292,7 @@ const ultimateTrafficLevels: LevelDefinition[] = ultimateTrafficTitles.map((titl
   const blockerCount = 1 + (index % 4);
   const group = Math.floor(index / 4);
   const firstColumn = (index * 3 + group * 2) % 4;
-  const blockerRow = [0, 1, 2, 1, 0][group];
+  const blockerRow = [0, 1, 2, 1, 1][group];
   const blockerLength = blockerRow === 0 ? 3 : group % 2 === 0 ? 2 : 3;
   const blockers: PuzzleVehicle[] = Array.from({ length: blockerCount }, (_, blockerIndex) => ({
     id: `v${blockerIndex}`,
