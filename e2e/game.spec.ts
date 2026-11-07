@@ -78,3 +78,40 @@ test("hint provides a legal next-step instruction without moving a vehicle", asy
   await expect(status).toContainText(/^Hint: slide the .+ one space (forward|backward)\.$/);
   await expect(page.locator("#move-count")).toHaveText("0");
 });
+
+test("restores unlocked world progress from this device", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("traffic-escape-3d-progress-v1", JSON.stringify({
+      highestUnlockedLevel: 21,
+      completedLevels: Array.from({ length: 20 }, (_, index) => index + 1)
+    }));
+  });
+  await page.goto("/");
+  const worldTwo = page.getByRole("button", { name: "Busy Roads, available" });
+  await expect(worldTwo).toBeEnabled();
+  await worldTwo.click();
+  await expect(page.locator(".progress-heading span")).toContainText("WORLD 2");
+  await expect(page.locator("#level-picker button").first()).toBeEnabled();
+  await expect(page.locator("#level-picker button").first()).toHaveAttribute("aria-label", "Level 21: Four Way Stop");
+});
+
+test("undo and restart controls handle an untouched level safely", async ({ page }) => {
+  await page.goto("/");
+  const status = page.locator("#status-message");
+  await page.locator("#undo-button").click();
+  await expect(status).toHaveText("No move to undo yet");
+  await page.locator("#restart-button").click();
+  await expect(page.locator("#move-count")).toHaveText("0");
+  await expect(status).toHaveText("Drag a vehicle to move it");
+});
+
+test("world selector keeps later worlds locked until their first level is unlocked", async ({ page }) => {
+  await page.goto("/");
+  const tabs = page.locator("#world-selector button");
+  await expect(tabs).toHaveCount(5);
+  await expect(tabs.nth(0)).toBeEnabled();
+  for (let index = 1; index < 5; index++) {
+    await expect(tabs.nth(index)).toBeDisabled();
+  }
+});
+
