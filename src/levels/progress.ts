@@ -26,9 +26,10 @@ export function loadProgress(): GameProgress {
   }
 }
 
-export function completeLevel(progress: GameProgress, levelId: number): GameProgress {
+export function completeLevel(progress: GameProgress, levelId: number, nextAvailableLevelId?: number): GameProgress {
   const completedLevels = [...new Set([...progress.completedLevels, levelId])].sort((a, b) => a - b);
-  return { highestUnlockedLevel: Math.max(progress.highestUnlockedLevel, levelId + 1), completedLevels };
+  const unlocked = nextAvailableLevelId ?? levelId + 1;
+  return { highestUnlockedLevel: Math.max(progress.highestUnlockedLevel, unlocked), completedLevels };
 }
 
 export function saveProgress(progress: GameProgress): void {
