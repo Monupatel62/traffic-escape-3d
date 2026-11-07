@@ -12,6 +12,7 @@ import { canPlaceVehicle, canSlideVehicle, solvePuzzle } from "./game/rules";
 import { vehicleWorldPosition, worldAxisToGridStart } from "./game/coordinates";
 import { getLevel, LEVELS } from "./levels/catalog";
 import { completeLevel, loadProgress, saveProgress } from "./levels/progress";
+import { GameAudio, loadAudioSettings } from "./game/audio";
 
 type Axis = "horizontal" | "vertical";
 type Vehicle = { id: string; name: string; x: number; y: number; length: number; axis: Axis; color: string; target?: boolean };
@@ -22,6 +23,7 @@ const CELL = 1;
 let activeLevelId = 1;
 let activeLevel = getLevel(activeLevelId)!;
 let progress = loadProgress();
+const audio = new GameAudio(loadAudioSettings());
 const vehicleColors: Record<string, string> = {
   red: "#f04452", blue: "#3998f5", green: "#28b989",
   yellow: "#ffc247", purple: "#9874e8", orange: "#f28b45"
@@ -221,6 +223,7 @@ function finishIfSolved(): void {
   const target = vehicles.find(v => v.target);
   if (target && target.x + target.length >= GRID) {
     completed = true;
+    audio.play("win");
     progress = completeLevel(progress, activeLevelId, LEVELS.find(level => level.id > activeLevelId)?.id ?? activeLevelId);
     saveProgress(progress);
     renderLevelPicker();
@@ -411,6 +414,28 @@ document.querySelector<HTMLButtonElement>("#undo-button")!.addEventListener("cli
   setStatus("Last move undone");
 });
 document.querySelector<HTMLButtonElement>("#reset-button")!.addEventListener("click", resetLevel);
+const settingsModal = document.querySelector<HTMLDivElement>("#settings-modal")!;
+const soundToggle = document.querySelector<HTMLInputElement>("#sound-toggle")!;
+const musicToggle = document.querySelector<HTMLInputElement>("#music-toggle")!;
+const savedAudioSettings = audio.getSettings();
+soundToggle.checked = savedAudioSettings.soundEnabled;
+musicToggle.checked = savedAudioSettings.musicEnabled;
+function updateAudioSettings(): void {
+  audio.setSettings({ soundEnabled: soundToggle.checked, musicEnabled: musicToggle.checked });
+}
+document.querySelector<HTMLButtonElement>("#settings-open")!.addEventListener("click", () => {
+  settingsModal.classList.remove("hidden");
+  audio.play("click");
+});
+document.querySelector<HTMLButtonElement>("#settings-close")!.addEventListener("click", () => settingsModal.classList.add("hidden"));
+settingsModal.addEventListener("click", event => {
+  if (event.target === settingsModal) settingsModal.classList.add("hidden");
+});
+soundToggle.addEventListener("change", updateAudioSettings);
+musicToggle.addEventListener("change", updateAudioSettings);
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && !settingsModal.classList.contains("hidden")) settingsModal.classList.add("hidden");
+});
 document.querySelector<HTMLButtonElement>("#replay-button")!.addEventListener("click", resetLevel);
 document.querySelector<HTMLButtonElement>("#next-button")!.addEventListener("click", () => {
   const next = LEVELS.find(level => level.id > activeLevelId && level.id <= progress.highestUnlockedLevel);
