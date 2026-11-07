@@ -67,3 +67,14 @@ h1 span{color:#8ea9c9}
 
 #game-canvas:focus-visible{outline:2px solid #6ce8c2;outline-offset:-5px;border-radius:22px}
 #game-canvas canvas{outline:none}
+
+/* Keep touch gestures inside the puzzle board on phones and tablets. */
+#game-canvas{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+#game-canvas canvas{display:block;width:100%;height:100%;touch-action:none}
+.board-frame{overflow:hidden;overscroll-behavior:contain}
+@media(max-width:650px){
+  .board-wrap{width:100%;margin-inline:auto}
+  .board-frame{width:100%;min-height:0}
+  .level-picker{gap:6px}
+  .level-tile{min-width:0;min-height:34px}
+}
