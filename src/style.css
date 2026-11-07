@@ -64,3 +64,6 @@ h1 span{color:#8ea9c9}
 .level-tile:disabled{cursor:not-allowed;opacity:.34}
 .level-tile.coming-soon{background:#ffffff05}
 @media(max-width:980px){.level-picker-card{grid-column:auto}}
+
+#game-canvas:focus-visible{outline:2px solid #6ce8c2;outline-offset:-5px;border-radius:22px}
+#game-canvas canvas{outline:none}
