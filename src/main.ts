@@ -28,14 +28,20 @@ const vehicleColors: Record<string, string> = {
 };
 const vehicleNames: Record<string, string> = {
   red: "Player car", blue: "Blue car", green: "Green van",
-  yellow: "Yellow car", purple: "Purple car", orange: "Orange van"
+  yellow: "Yellow car", purple: "Purple car", orange: "Orange van",
+  v0: "Teal car", v1: "Silver car", v2: "Pink car", v3: "Gold van",
+  v4: "Cyan car", v5: "Violet van", v6: "Lime car", v7: "Amber van"
+};
+const extraVehicleColors: Record<string, string> = {
+  v0: "#20b8a6", v1: "#a9b7c9", v2: "#e879a9", v3: "#e8b84d",
+  v4: "#42c5df", v5: "#9a83ef", v6: "#8acb58", v7: "#ed9651"
 };
 function vehiclesForLevel(levelId: number): Vehicle[] {
   const level = getLevel(levelId)!;
   return level.vehicles.map(vehicle => ({
   ...vehicle,
   name: vehicleNames[vehicle.id] ?? "Vehicle",
-  color: vehicleColors[vehicle.id] ?? "#7c8da5"
+  color: vehicleColors[vehicle.id] ?? extraVehicleColors[vehicle.id] ?? "#7c8da5"
   }));
 }
 let initialVehicles: Vehicle[] = vehiclesForLevel(activeLevelId);
