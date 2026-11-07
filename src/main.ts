@@ -9,6 +9,8 @@ if ("serviceWorker" in navigator) {
 import * as THREE from "three";
 import "./style.css";
 import { canPlaceVehicle, canSlideVehicle, solvePuzzle } from "./game/rules";
+import { getLevel } from "./levels/catalog";
+import { completeLevel, loadProgress, saveProgress } from "./levels/progress";
 
 type Axis = "horizontal" | "vertical";
 type Vehicle = { id: string; name: string; x: number; y: number; length: number; axis: Axis; color: string; target?: boolean };
@@ -16,14 +18,22 @@ type Snapshot = { vehicles: Vehicle[]; moves: number };
 
 const GRID = 6;
 const CELL = 1;
-const initialVehicles: Vehicle[] = [
-  { id: "red", name: "Player car", x: 0, y: 2, length: 2, axis: "horizontal", color: "#f04452", target: true },
-  { id: "blue", name: "Blue car", x: 2, y: 0, length: 2, axis: "vertical", color: "#3998f5" },
-  { id: "green", name: "Green van", x: 4, y: 0, length: 3, axis: "vertical", color: "#28b989" },
-  { id: "yellow", name: "Yellow car", x: 0, y: 1, length: 2, axis: "horizontal", color: "#ffc247" },
-  { id: "purple", name: "Purple car", x: 3, y: 3, length: 2, axis: "vertical", color: "#9874e8" },
-  { id: "orange", name: "Orange van", x: 1, y: 5, length: 2, axis: "horizontal", color: "#f28b45" }
-];
+const ACTIVE_LEVEL_ID = 1;
+const ACTIVE_LEVEL = getLevel(ACTIVE_LEVEL_ID)!;
+const progress = loadProgress();
+const vehicleColors: Record<string, string> = {
+  red: "#f04452", blue: "#3998f5", green: "#28b989",
+  yellow: "#ffc247", purple: "#9874e8", orange: "#f28b45"
+};
+const vehicleNames: Record<string, string> = {
+  red: "Player car", blue: "Blue car", green: "Green van",
+  yellow: "Yellow car", purple: "Purple car", orange: "Orange van"
+};
+const initialVehicles: Vehicle[] = ACTIVE_LEVEL.vehicles.map(vehicle => ({
+  ...vehicle,
+  name: vehicleNames[vehicle.id] ?? "Vehicle",
+  color: vehicleColors[vehicle.id] ?? "#7c8da5"
+}));
 
 const canvasHost = document.querySelector<HTMLDivElement>("#game-canvas")!;
 const statusMessage = document.querySelector<HTMLDivElement>("#status-message")!;
@@ -154,6 +164,8 @@ function finishIfSolved(): void {
   const target = vehicles.find(v => v.target);
   if (target && target.x + target.length >= GRID) {
     completed = true;
+    const updatedProgress = completeLevel(progress, ACTIVE_LEVEL_ID);
+    saveProgress(updatedProgress);
     winModal.classList.remove("hidden");
     setStatus("Road cleared! You did it.");
   }
@@ -298,7 +310,7 @@ document.querySelector<HTMLButtonElement>("#replay-button")!.addEventListener("c
 document.querySelector<HTMLButtonElement>("#next-button")!.addEventListener("click", () => {
   winModal.classList.add("hidden");
   resetLevel();
-  setStatus("Level 2 is coming soon — prototype level reset");
+  setStatus("More levels are being prepared. Your progress is saved on this device.");
 });
 document.querySelector<HTMLButtonElement>("#hint-button")!.addEventListener("click", () => {
   const solution = solvePuzzle(vehicles, GRID);
