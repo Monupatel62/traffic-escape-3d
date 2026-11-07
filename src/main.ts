@@ -20,7 +20,7 @@ const GRID = 6;
 const CELL = 1;
 let activeLevelId = 1;
 let activeLevel = getLevel(activeLevelId)!;
-const progress = loadProgress();
+let progress = loadProgress();
 const vehicleColors: Record<string, string> = {
   red: "#f04452", blue: "#3998f5", green: "#28b989",
   yellow: "#ffc247", purple: "#9874e8", orange: "#f28b45"
@@ -168,8 +168,9 @@ function finishIfSolved(): void {
   const target = vehicles.find(v => v.target);
   if (target && target.x + target.length >= GRID) {
     completed = true;
-    const updatedProgress = completeLevel(progress, activeLevelId, LEVELS.find(level => level.id > activeLevelId)?.id ?? activeLevelId);
-    saveProgress(updatedProgress);
+    progress = completeLevel(progress, activeLevelId, LEVELS.find(level => level.id > activeLevelId)?.id ?? activeLevelId);
+    saveProgress(progress);
+    renderLevelPicker();
     winModal.classList.remove("hidden");
     setStatus("Road cleared! You did it.");
   }
