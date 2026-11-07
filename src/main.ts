@@ -243,6 +243,7 @@ function moveVehicle(v: Vehicle, axisPosition: number): boolean {
     saveSnapshot();
     v.x = GRID - v.length;
     moves++;
+    audio.play("move");
     renderMoveCount();
     rebuildVehicles();
     finishIfSolved();
@@ -254,6 +255,7 @@ function moveVehicle(v: Vehicle, axisPosition: number): boolean {
   saveSnapshot();
   v.x = x; v.y = y;
   moves++;
+  audio.play("move");
   renderMoveCount();
   rebuildVehicles();
   animateVehicleMove(v.id, from, worldPosition(v));
