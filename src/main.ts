@@ -9,6 +9,7 @@ if ("serviceWorker" in navigator) {
 import * as THREE from "three";
 import "./style.css";
 import { canPlaceVehicle, canSlideVehicle, solvePuzzle } from "./game/rules";
+import { vehicleWorldPosition, worldAxisToGridStart } from "./game/coordinates";
 import { getLevel, LEVELS } from "./levels/catalog";
 import { completeLevel, loadProgress, saveProgress } from "./levels/progress";
 
@@ -114,9 +115,8 @@ let history: Snapshot[] = [];
 let completed = false;
 
 function worldPosition(v: Vehicle): THREE.Vector3 {
-  const center = v.axis === "horizontal" ? v.x + v.length / 2 - 3 : v.x - 3;
-  const depth = v.axis === "horizontal" ? v.y - 2.5 : v.y + v.length / 2 - 3;
-  return v.axis === "horizontal" ? new THREE.Vector3(center, 0.18, depth) : new THREE.Vector3(depth, 0.18, center);
+  const position = vehicleWorldPosition(v);
+  return new THREE.Vector3(position.x, 0.18, position.z);
 }
 
 function makeVehicle(v: Vehicle): THREE.Group {
@@ -270,8 +270,7 @@ function dragVehicle(event: PointerEvent): void {
   const mesh = meshes.get(selectedId);
   if (!v || !mesh) return;
   const axis = v.axis === "horizontal" ? dragPoint.x : dragPoint.z;
-  const boardAxis = axis + 3 - dragOffset - v.length / 2;
-  const next = Math.round(boardAxis);
+  const next = worldAxisToGridStart(axis, dragOffset, v.length);
   const x = v.axis === "horizontal" ? next : v.x;
   const y = v.axis === "vertical" ? next : v.y;
   if (canSlideVehicle(v, next, vehicles, GRID)) {
@@ -290,8 +289,7 @@ function releaseVehicle(): void {
     const mesh = meshes.get(selectedId);
     if (mesh) {
       const axis = v.axis === "horizontal" ? mesh.position.x : mesh.position.z;
-      const next = Math.round(axis + 3 - (v.axis === "horizontal" ? v.length / 2 : v.length / 2));
-      const candidate = v.axis === "horizontal" ? next : next;
+      const candidate = worldAxisToGridStart(axis, 0, v.length);
       if (candidate !== dragStartPosition) moveVehicle(v, candidate);
     }
   }
