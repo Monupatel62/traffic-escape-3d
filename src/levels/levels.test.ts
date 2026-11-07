@@ -15,6 +15,18 @@ describe("level catalog", () => {
       expect(new Set(worldLevels.map(level => JSON.stringify(level.vehicles))).size).toBe(20);
     }
   });
+  it("adds cross-traffic variety to the later worlds", () => {
+    for (const world of [3, 4, 5]) {
+      const worldLevels = LEVELS.filter(level => level.world === world);
+      const crossTraffic = worldLevels.map(level =>
+        level.vehicles.find(vehicle => vehicle.id === "v7")
+      );
+      expect(crossTraffic.every(vehicle =>
+        vehicle?.axis === "horizontal" && vehicle.y === 5 && vehicle.length === 2
+      )).toBe(true);
+      expect(new Set(crossTraffic.map(vehicle => vehicle?.x)).size).toBe(3);
+    }
+  });
   it("places at least one blocker in every level's target escape lane", () => {
     for (const level of LEVELS) {
       const target = level.vehicles.find(vehicle => vehicle.target)!;
