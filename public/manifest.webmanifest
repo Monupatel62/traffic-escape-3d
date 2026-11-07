@@ -1,0 +1,11 @@
+{
+  "name": "Traffic Escape 3D",
+  "short_name": "Traffic Escape",
+  "description": "A colorful 3D traffic puzzle game.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#101827",
+  "theme_color": "#101827",
+  "orientation": "any",
+  "icons": []
+}
