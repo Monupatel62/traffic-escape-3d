@@ -1,11 +1,19 @@
 {
   "name": "Traffic Escape 3D",
   "short_name": "Traffic Escape",
-  "description": "A colorful 3D traffic puzzle game.",
+  "description": "A colorful 3D traffic puzzle game. Play 100 offline levels.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#101827",
   "theme_color": "#101827",
   "orientation": "any",
-  "icons": []
+  "icons": [
+    {
+      "src": "/icons/traffic-escape.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
 }
