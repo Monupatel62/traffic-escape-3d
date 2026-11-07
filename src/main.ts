@@ -102,6 +102,7 @@ const dragPoint = new THREE.Vector3();
 let vehicles: Vehicle[] = structuredClone(initialVehicles);
 let meshes = new Map<string, THREE.Group>();
 let selectedId: string | null = null;
+let keyboardSelectedId: string | null = null;
 let dragOffset = 0;
 let dragStartPosition = 0;
 let dragMoved = false;
@@ -129,10 +130,32 @@ function makeVehicle(v: Vehicle): THREE.Group {
   cabin.position.set(0, 0.65, 0);
   group.add(cabin);
   const bumperMat = new THREE.MeshStandardMaterial({ color: "#182536", roughness: 0.55 });
+  const wheelGeometry = new THREE.BoxGeometry(0.2, 0.19, 0.16);
+  for (const along of [-1, 1]) {
+    for (const across of [-1, 1]) {
+      const wheel = new THREE.Mesh(wheelGeometry, bumperMat);
+      wheel.position.set(
+        v.axis === "horizontal" ? along * width * 0.31 : across * 0.39,
+        0.12,
+        v.axis === "horizontal" ? across * 0.39 : along * depth * 0.31
+      );
+      wheel.castShadow = true;
+      group.add(wheel);
+    }
+  }
+  const lightMaterial = new THREE.MeshStandardMaterial({ color: "#fff0b8", emissive: "#ffd36b", emissiveIntensity: 1.4 });
+  const tailMaterial = new THREE.MeshStandardMaterial({ color: "#ff6572", emissive: "#e52e45", emissiveIntensity: 0.8 });
   for (const side of [-1, 1]) {
-    const wheel = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.2, 0.18), bumperMat);
-    wheel.position.set(v.axis === "horizontal" ? side * (width * 0.31) : 0.38, 0.12, v.axis === "horizontal" ? 0.38 : side * (depth * 0.31));
-    group.add(wheel);
+    const headlight = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.1, 0.08), lightMaterial);
+    const taillight = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.1, 0.08), tailMaterial);
+    if (v.axis === "horizontal") {
+      headlight.position.set(width / 2 - 0.04, 0.36, side * 0.22);
+      taillight.position.set(-width / 2 + 0.04, 0.36, side * 0.22);
+    } else {
+      headlight.position.set(side * 0.22, 0.36, depth / 2 - 0.04);
+      taillight.position.set(side * 0.22, 0.36, -depth / 2 + 0.04);
+    }
+    group.add(headlight, taillight);
   }
   if (v.target) {
     const stripe = new THREE.Mesh(new THREE.BoxGeometry(width * 0.55, 0.025, 0.08), new THREE.MeshStandardMaterial({ color: "#ffe7a3", emissive: "#ffb52e", emissiveIntensity: 0.35 }));
@@ -218,6 +241,8 @@ function pickVehicle(event: PointerEvent): void {
   const v = vehicles.find(item => item.id === id);
   if (!v) return;
   selectedId = id;
+  keyboardSelectedId = id;
+  renderer.domElement.focus();
   dragStartPosition = v.axis === "horizontal" ? v.x : v.y;
   dragMoved = false;
   raycaster.ray.intersectPlane(dragPlane, dragPoint);
@@ -276,6 +301,31 @@ renderer.domElement.addEventListener("pointerdown", pickVehicle);
 renderer.domElement.addEventListener("pointermove", dragVehicle);
 renderer.domElement.addEventListener("pointerup", releaseVehicle);
 renderer.domElement.addEventListener("pointercancel", releaseVehicle);
+
+renderer.domElement.addEventListener("keydown", (event: KeyboardEvent) => {
+  if (event.key === "Escape") {
+    keyboardSelectedId = null;
+    setStatus("Vehicle selection cleared");
+    return;
+  }
+  if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
+  event.preventDefault();
+  const vehicle = vehicles.find(item => item.id === keyboardSelectedId);
+  if (!vehicle) {
+    setStatus("Select a vehicle with your pointer, then use the arrow keys");
+    return;
+  }
+  const horizontalKey = event.key === "ArrowLeft" || event.key === "ArrowRight";
+  if ((vehicle.axis === "horizontal") !== horizontalKey) {
+    setStatus(vehicle.axis === "horizontal" ? "Use left and right arrow keys for this vehicle" : "Use up and down arrow keys for this vehicle");
+    return;
+  }
+  const direction = event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : -1;
+  const current = vehicle.axis === "horizontal" ? vehicle.x : vehicle.y;
+  const moved = moveVehicle(vehicle, current + direction);
+  if (moved) setStatus(`${vehicle.name} moved. Use arrow keys to continue or Escape to clear selection.`);
+  else setStatus("That space is blocked");
+});
 
 function resize(): void {
   const width = canvasHost.clientWidth;
