@@ -346,3 +346,17 @@ export function validateLevelCatalog(levels: LevelDefinition[] = LEVELS): string
   }
   return errors;
 }
+
+/** Classifies a puzzle using the solver's minimum number of one-cell vehicle slides. */
+export function getPuzzleDifficulty(vehicles: PuzzleVehicle[], gridSize: number): LevelDefinition["difficulty"] {
+  const solution = solvePuzzle(vehicles, gridSize);
+  if (!solution) return "Hard";
+  if (solution.length <= 4) return "Easy";
+  if (solution.length <= 8) return "Normal";
+  return "Hard";
+}
+
+// Keep the displayed difficulty aligned with measured puzzle complexity.
+for (const level of LEVELS) {
+  level.difficulty = getPuzzleDifficulty(level.vehicles, level.gridSize);
+}
