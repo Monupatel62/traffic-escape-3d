@@ -4,11 +4,14 @@ const APP_SHELL = ["/", "/manifest.webmanifest", "/icons/traffic-escape.svg"];
 
 async function getBuildAssets() {
   try {
-    const response = await fetch("/.vite/manifest.json", { cache: "no-cache" });
+    const response = await fetch("/manifest.json", { cache: "no-cache" });
     if (!response.ok) return [];
     const manifest = await response.json();
     const assets = new Set();
+    const visited = new Set();
     const visit = entry => {
+      if (visited.has(entry)) return;
+      visited.add(entry);
       if (!entry || typeof entry !== "object") return;
       if (typeof entry.file === "string") assets.add(`/${entry.file.replace(/^\//, "")}`);
       for (const file of [...(entry.css ?? []), ...(entry.assets ?? [])]) {
