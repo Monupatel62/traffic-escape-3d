@@ -102,7 +102,61 @@ const extraLevels: LevelDefinition[] = extraLevelTitles.map((title, index) => {
   };
 });
 
-export const LEVELS: LevelDefinition[] = [
+
+
+const busyRoadTitles = [
+  "Four Way Stop",
+  "Double Merge",
+  "Depot Crossing",
+  "Lane Pressure",
+  "Bus Lane Jam",
+  "Signal Shuffle",
+  "Bridge Approach",
+  "Side Road Snarl",
+  "Metro Traffic",
+  "Corner Bottleneck",
+  "Market Junction",
+  "Tunnel Queue",
+  "Crosswalk Rush",
+  "Overpass Hold",
+  "Ring Road",
+  "City Centre",
+  "Peak Hour",
+  "Last Junction",
+  "Heavy Traffic",
+  "Busy Roads Finale"
+];
+
+// World 2 uses denser target-lane blockers and extra parked traffic to raise the puzzle load.
+const busyRoadLevels: LevelDefinition[] = busyRoadTitles.map((title, index) => {
+  const id = index + 21;
+  const blockerCount = 2 + (index % 2);
+  const firstColumn = 2 + (index % (5 - blockerCount));
+  const blockerRow = index % 2 === 0 ? 1 : 2;
+  const blockers: PuzzleVehicle[] = Array.from({ length: blockerCount }, (_, blockerIndex) => ({
+    id: `v${blockerIndex}`,
+    x: firstColumn + blockerIndex,
+    y: blockerRow,
+    length: 2,
+    axis: "vertical"
+  }));
+  const topCarX = (index % 3) * 2;
+  const bottomCarX = (Math.floor(index / 2) % 3) * 2;
+  return {
+    id,
+    world: 2,
+    title,
+    difficulty: index % 5 === 4 ? "Hard" : index % 3 === 0 ? "Normal" : "Hard",
+    gridSize: 6,
+    vehicles: [
+      { id: "red", x: 0, y: 2, length: 2, axis: "horizontal", target: true },
+      ...blockers,
+      { id: "v7", x: topCarX, y: 0, length: 2, axis: "horizontal" },
+      { id: "v8", x: bottomCarX, y: 5, length: 2, axis: "horizontal" }
+    ]
+  };
+});
+\nexport const LEVELS: LevelDefinition[] = [
   { id: 1, world: 1, title: "First Escape", difficulty: "Easy", gridSize: 6, vehicles: tutorialVehicles },
   { id: 2, world: 1, title: "One Block Away", difficulty: "Easy", gridSize: 6, vehicles: levelTwoVehicles },
   { id: 3, world: 1, title: "Double Trouble", difficulty: "Normal", gridSize: 6, vehicles: levelThreeVehicles },
