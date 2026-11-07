@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#101827" />
+    <meta name="description" content="A colorful 3D traffic puzzle. Slide vehicles, clear the road and escape the jam." />
+    <title>Traffic Escape 3D</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Traffic Escape 3D home"><span class="brand-mark">TE</span><span>TRAFFIC <b>ESCAPE 3D</b></span></a>
+        <div class="top-stats"><span class="pill">LEVEL <b id="level-number">01</b></span><span class="pill">MOVES <b id="move-count">0</b></span></div>
+      </header>
+      <main class="game-layout">
+        <section class="intro">
+          <p class="eyebrow">CITY PUZZLE • CLASSIC MODE</p>
+          <h1>Clear the road.<br /><span>Find your way out.</span></h1>
+          <p class="instructions">Slide each vehicle along its lane. Move the red car to the glowing exit on the right.</p>
+          <div class="level-meta"><span class="level-dot"></span><span>WORLD 1 — CITY STREETS</span><span class="difficulty">EASY</span></div>
+        </section>
+        <section class="board-wrap" aria-label="3D traffic puzzle board">
+          <div class="board-frame"><div id="game-canvas"></div><div class="exit-label">EXIT <span>→</span></div></div>
+          <div class="board-hint" id="status-message" role="status">Drag a vehicle to move it</div>
+          <div class="controls"><button id="undo-button" class="secondary">↶ Undo</button><button id="reset-button" class="secondary">↻ Restart</button><button id="hint-button" class="primary">Hint</button></div>
+        </section>
+        <aside class="side-panel">
+          <div class="panel-card">
+            <div class="panel-icon">🚗</div><h2>Your goal</h2>
+            <p>Clear the lane in front of the red car, then slide it through the exit.</p>
+          </div>
+          <div class="panel-card progress-card">
+            <div class="progress-heading"><span>LEVEL PROGRESS</span><b>1 / 100</b></div><div class="progress-track"><span></span></div>
+            <p>Complete levels to unlock the next city streets.</p>
+          </div>
+          <div class="tip">💡 <span>Tip: Vehicles can only move forward and backward along their own direction.</span></div>
+        </aside>
+      </main>
+      <div id="win-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="win-title">
+        <div class="modal-card"><div class="win-emoji">🏆</div><p class="eyebrow">ROAD CLEARED</p><h2 id="win-title">Level complete!</h2><p>You found the way out. Nice driving.</p><div class="stars">★ ★ ★</div><div class="win-actions"><button id="replay-button" class="secondary">Replay</button><button id="next-button" class="primary">Next level →</button></div></div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
