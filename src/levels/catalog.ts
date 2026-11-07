@@ -186,7 +186,7 @@ const highwayRushTitles = [
 const highwayRushLevels: LevelDefinition[] = highwayRushTitles.map((title, index) => {
   const id = index + 41;
   const blockerCount = 1 + (index % 4);
-  const firstColumn = index % 4;
+  const firstColumn = (index * 3 + Math.floor(index / 4)) % 4;
   const blockerRow = Math.floor(index / 4) % 2 === 0 ? 0 : 3;
   const blockerLength = Math.floor(index / 8) % 2 === 0 ? 3 : 2;
   const blockers: PuzzleVehicle[] = Array.from({ length: blockerCount }, (_, blockerIndex) => ({
