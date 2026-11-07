@@ -210,6 +210,58 @@ const highwayRushLevels: LevelDefinition[] = highwayRushTitles.map((title, index
   };
 });
 
+
+const downtownTitles = [
+  "Downtown Arrival",
+  "One Way Avenue",
+  "Parking Tower",
+  "Cross Street",
+  "Office District",
+  "Taxi Stand",
+  "Central Plaza",
+  "Underpass",
+  "Mall Entrance",
+  "City Loop",
+  "Late Commute",
+  "Four Corners",
+  "Station Road",
+  "Narrow Boulevard",
+  "Civic Centre",
+  "Parking Exit",
+  "Business Quarter",
+  "Last Intersection",
+  "Downtown Rush",
+  "Midnight Gridlock"
+];
+
+// World 4 varies blocker lanes, starting columns, and vehicle lengths.
+const downtownLevels: LevelDefinition[] = downtownTitles.map((title, index) => {
+  const id = index + 61;
+  const blockerCount = 1 + (index % 4);
+  const group = Math.floor(index / 4);
+  const firstColumn = (index * 3 + group) % 4;
+  const blockerRow = [0, 3, 1, 4, 0][group];
+  const blockerLength = group % 2 === 0 ? 2 : 3;
+  const blockers: PuzzleVehicle[] = Array.from({ length: blockerCount }, (_, blockerIndex) => ({
+    id: `v${blockerIndex}`,
+    x: 2 + ((firstColumn + blockerIndex) % 4),
+    y: blockerRow,
+    length: blockerLength,
+    axis: "vertical"
+  }));
+  return {
+    id,
+    world: 4,
+    title,
+    difficulty: blockerCount <= 2 ? "Normal" : "Hard",
+    gridSize: 6,
+    vehicles: [
+      { id: "red", x: 0, y: 2, length: 2, axis: "horizontal", target: true },
+      ...blockers
+    ]
+  };
+});
+
 export const LEVELS: LevelDefinition[] = [
   { id: 1, world: 1, title: "First Escape", difficulty: "Easy", gridSize: 6, vehicles: tutorialVehicles },
   { id: 2, world: 1, title: "One Block Away", difficulty: "Easy", gridSize: 6, vehicles: levelTwoVehicles },
@@ -219,7 +271,8 @@ export const LEVELS: LevelDefinition[] = [
   { id: 6, world: 1, title: "Gridlock", difficulty: "Hard", gridSize: 6, vehicles: levelSixVehicles },
   ...extraLevels,
   ...busyRoadLevels,
-  ...highwayRushLevels
+  ...highwayRushLevels,
+  ...downtownLevels
 ];
 
 export function getLevel(levelId: number): LevelDefinition | undefined {
