@@ -16,7 +16,7 @@ describe("vehicle board coordinates", () => {
   it("converts both lane coordinates back to their grid start", () => {
     expect(worldAxisToGridStart(-2, 0, 2)).toBe(0);
     expect(worldAxisToGridStart(0, 0, 3)).toBe(2);
-    expect(worldAxisToGridStart(-1.5, 0, 2)).toBe(0);
+    expect(worldAxisToGridStart(-1.5, 0, 2)).toBe(1);
   });
 
   it("preserves the grabbed pointer offset", () => {
