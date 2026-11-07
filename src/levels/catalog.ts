@@ -80,7 +80,7 @@ const extraLevels: LevelDefinition[] = extraLevelTitles.map((title, index) => {
   const id = index + 7;
   const blockerCount = 1 + (index % 3);
   const firstColumn = index % 2 === 0 ? 2 : 3;
-  const blockerRow = index % 2 === 0 ? 1 : 3;
+  const blockerRow = 1;
   const blockers: PuzzleVehicle[] = Array.from({ length: blockerCount }, (_, blockerIndex) => ({
     id: `v${blockerIndex}`,
     x: firstColumn + blockerIndex,
@@ -188,8 +188,8 @@ const highwayRushLevels: LevelDefinition[] = highwayRushTitles.map((title, index
   const blockerCount = 1 + (index % 4);
   const firstColumn = (index * 3 + Math.floor(index / 4)) % 4;
   const blockerGroup = Math.floor(index / 4);
-  const blockerRow = [0, 3, 1, 0, 3][blockerGroup];
-  const blockerLength = Math.floor(index / 8) % 2 === 0 ? 3 : 2;
+  const blockerRow = [0, 1, 2, 0, 1][blockerGroup];
+  const blockerLength = blockerRow === 0 ? 3 : Math.floor(index / 8) % 2 === 0 ? 3 : 2;
   const blockers: PuzzleVehicle[] = Array.from({ length: blockerCount }, (_, blockerIndex) => ({
     id: `v${blockerIndex}`,
     x: 2 + ((firstColumn + blockerIndex) % 4),
@@ -240,8 +240,8 @@ const downtownLevels: LevelDefinition[] = downtownTitles.map((title, index) => {
   const blockerCount = 1 + (index % 4);
   const group = Math.floor(index / 4);
   const firstColumn = (index * 3 + group) % 4;
-  const blockerRow = [0, 3, 1, 4, 0][group];
-  const blockerLength = blockerRow === 4 ? 2 : group === 4 ? 3 : group % 2 === 0 ? 2 : 3;
+  const blockerRow = [0, 1, 2, 1, 0][group];
+  const blockerLength = blockerRow === 0 ? 3 : group % 2 === 0 ? 2 : 3;
   const blockers: PuzzleVehicle[] = Array.from({ length: blockerCount }, (_, blockerIndex) => ({
     id: `v${blockerIndex}`,
     x: 2 + ((firstColumn + blockerIndex) % 4),
@@ -292,8 +292,8 @@ const ultimateTrafficLevels: LevelDefinition[] = ultimateTrafficTitles.map((titl
   const blockerCount = 1 + (index % 4);
   const group = Math.floor(index / 4);
   const firstColumn = (index * 3 + group * 2) % 4;
-  const blockerRow = [0, 1, 3, 4, 0][group];
-  const blockerLength = blockerRow === 4 || group === 4 ? 2 : group % 2 === 0 ? 3 : 2;
+  const blockerRow = [0, 1, 2, 1, 0][group];
+  const blockerLength = blockerRow === 0 ? 3 : group % 2 === 0 ? 2 : 3;
   const blockers: PuzzleVehicle[] = Array.from({ length: blockerCount }, (_, blockerIndex) => ({
     id: `v${blockerIndex}`,
     x: 2 + ((firstColumn + blockerIndex) % 4),
