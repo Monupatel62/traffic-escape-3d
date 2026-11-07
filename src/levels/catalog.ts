@@ -165,7 +165,8 @@ export const LEVELS: LevelDefinition[] = [
   { id: 4, world: 1, title: "Cross Traffic", difficulty: "Normal", gridSize: 6, vehicles: levelFourVehicles },
   { id: 5, world: 1, title: "Lane Switch", difficulty: "Hard", gridSize: 6, vehicles: levelFiveVehicles },
   { id: 6, world: 1, title: "Gridlock", difficulty: "Hard", gridSize: 6, vehicles: levelSixVehicles },
-  ...extraLevels
+  ...extraLevels,
+  ...busyRoadLevels
 ];
 
 export function getLevel(levelId: number): LevelDefinition | undefined {
