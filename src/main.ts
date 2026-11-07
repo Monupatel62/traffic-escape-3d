@@ -235,7 +235,7 @@ function dragVehicle(event: PointerEvent): void {
   const mesh = meshes.get(selectedId);
   if (!v || !mesh) return;
   const axis = v.axis === "horizontal" ? dragPoint.x : dragPoint.z;
-  const boardAxis = axis + 3 - dragOffset;
+  const boardAxis = axis + 3 - dragOffset - v.length / 2;
   const next = Math.round(boardAxis);
   const x = v.axis === "horizontal" ? next : v.x;
   const y = v.axis === "vertical" ? next : v.y;
