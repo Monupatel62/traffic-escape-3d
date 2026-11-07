@@ -15,6 +15,21 @@ describe("level catalog", () => {
       expect(new Set(worldLevels.map(level => JSON.stringify(level.vehicles))).size).toBe(20);
     }
   });
+  it("places at least one blocker in every level's target escape lane", () => {
+    for (const level of LEVELS) {
+      const target = level.vehicles.find(vehicle => vehicle.target)!;
+      const blocked = level.vehicles.some(vehicle => {
+        if (vehicle.id === target.id) return false;
+        for (let offset = 0; offset < vehicle.length; offset++) {
+          const x = vehicle.axis === "horizontal" ? vehicle.x + offset : vehicle.x;
+          const y = vehicle.axis === "vertical" ? vehicle.y + offset : vehicle.y;
+          if (y === target.y && x >= target.x + target.length && x < level.gridSize) return true;
+        }
+        return false;
+      });
+      expect(blocked, `Level ${level.id} should require clearing traffic from the target lane`).toBe(true);
+    }
+  });
   it("returns undefined for unknown levels", () => expect(getLevel(999)).toBeUndefined());
 });
 
