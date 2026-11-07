@@ -18,8 +18,27 @@ const tutorialVehicles: PuzzleVehicle[] = [
   { id: "orange", x: 1, y: 5, length: 2, axis: "horizontal" }
 ];
 
+const levelTwoVehicles: PuzzleVehicle[] = [
+  { id: "red", x: 0, y: 2, length: 2, axis: "horizontal", target: true },
+  { id: "blue", x: 2, y: 2, length: 2, axis: "vertical" },
+  { id: "green", x: 0, y: 0, length: 2, axis: "horizontal" },
+  { id: "yellow", x: 5, y: 0, length: 2, axis: "vertical" },
+  { id: "purple", x: 3, y: 4, length: 2, axis: "horizontal" }
+];
+
+const levelThreeVehicles: PuzzleVehicle[] = [
+  { id: "red", x: 0, y: 2, length: 2, axis: "horizontal", target: true },
+  { id: "blue", x: 2, y: 2, length: 2, axis: "vertical" },
+  { id: "green", x: 4, y: 2, length: 2, axis: "vertical" },
+  { id: "yellow", x: 0, y: 0, length: 2, axis: "horizontal" },
+  { id: "purple", x: 3, y: 4, length: 2, axis: "horizontal" },
+  { id: "orange", x: 0, y: 5, length: 2, axis: "horizontal" }
+];
+
 export const LEVELS: LevelDefinition[] = [
-  { id: 1, world: 1, title: "First Escape", difficulty: "Easy", gridSize: 6, vehicles: tutorialVehicles }
+  { id: 1, world: 1, title: "First Escape", difficulty: "Easy", gridSize: 6, vehicles: tutorialVehicles },
+  { id: 2, world: 1, title: "One Block Away", difficulty: "Easy", gridSize: 6, vehicles: levelTwoVehicles },
+  { id: 3, world: 1, title: "Double Trouble", difficulty: "Normal", gridSize: 6, vehicles: levelThreeVehicles }
 ];
 
 export function getLevel(levelId: number): LevelDefinition | undefined {
