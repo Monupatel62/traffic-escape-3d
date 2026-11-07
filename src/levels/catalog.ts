@@ -68,13 +68,47 @@ const levelSixVehicles: PuzzleVehicle[] = [
   { id: "v4", x: 2, y: 2, length: 2, axis: "vertical" }
 ];
 
+
+const extraLevelTitles = [
+  "Morning Detour", "Two Lane Trouble", "Bus Stop Block", "Side Street Jam",
+  "Rush Hour Start", "Narrow Passage", "City Crossing", "Traffic Stack",
+  "Market Street", "Double Queue", "Road Works", "Central Junction",
+  "Evening Bottleneck", "Last City Exit"
+];
+
+const extraLevels: LevelDefinition[] = extraLevelTitles.map((title, index) => {
+  const id = index + 7;
+  const blockerCount = 1 + (index % 3);
+  const firstColumn = index % 2 === 0 ? 2 : 3;
+  const blockerRow = index % 2 === 0 ? 1 : 3;
+  const blockers: PuzzleVehicle[] = Array.from({ length: blockerCount }, (_, blockerIndex) => ({
+    id: `v${blockerIndex}`,
+    x: firstColumn + blockerIndex,
+    y: blockerRow,
+    length: 2,
+    axis: "vertical"
+  }));
+  return {
+    id,
+    world: 1,
+    title,
+    difficulty: blockerCount === 1 ? "Easy" : blockerCount === 2 ? "Normal" : "Hard",
+    gridSize: 6,
+    vehicles: [
+      { id: "red", x: 0, y: 2, length: 2, axis: "horizontal", target: true },
+      ...blockers
+    ]
+  };
+});
+
 export const LEVELS: LevelDefinition[] = [
   { id: 1, world: 1, title: "First Escape", difficulty: "Easy", gridSize: 6, vehicles: tutorialVehicles },
   { id: 2, world: 1, title: "One Block Away", difficulty: "Easy", gridSize: 6, vehicles: levelTwoVehicles },
   { id: 3, world: 1, title: "Double Trouble", difficulty: "Normal", gridSize: 6, vehicles: levelThreeVehicles },
   { id: 4, world: 1, title: "Cross Traffic", difficulty: "Normal", gridSize: 6, vehicles: levelFourVehicles },
   { id: 5, world: 1, title: "Lane Switch", difficulty: "Hard", gridSize: 6, vehicles: levelFiveVehicles },
-  { id: 6, world: 1, title: "Gridlock", difficulty: "Hard", gridSize: 6, vehicles: levelSixVehicles }
+  { id: 6, world: 1, title: "Gridlock", difficulty: "Hard", gridSize: 6, vehicles: levelSixVehicles },
+  ...extraLevels
 ];
 
 export function getLevel(levelId: number): LevelDefinition | undefined {
