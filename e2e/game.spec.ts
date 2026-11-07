@@ -65,8 +65,15 @@ test("service worker installs and the app shell remains available offline", asyn
   });
   expect(precache.jsAssets.length).toBeGreaterThan(0);
   expect(precache.cachedAssets.length).toBe(precache.jsAssets.length);
+  const offlineErrors: string[] = [];
+  page.on("pageerror", error => offlineErrors.push(error.message));
+  page.on("response", response => {
+    if (response.status() >= 400) offlineErrors.push(`${response.status()} ${response.url()}`);
+  });
   await context.setOffline(true);
   await page.reload();
+  await page.waitForTimeout(1000);
+  console.log("OFFLINE_DEBUG", JSON.stringify(offlineErrors));
   await expect(page.locator("#game-canvas canvas")).toBeVisible();
   await context.setOffline(false);
 });
