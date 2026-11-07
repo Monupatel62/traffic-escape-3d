@@ -9,7 +9,7 @@ if ("serviceWorker" in navigator) {
 import * as THREE from "three";
 import "./style.css";
 import { canPlaceVehicle, canSlideVehicle, solvePuzzle } from "./game/rules";
-import { getLevel } from "./levels/catalog";
+import { getLevel, LEVELS } from "./levels/catalog";
 import { completeLevel, loadProgress, saveProgress } from "./levels/progress";
 
 type Axis = "horizontal" | "vertical";
@@ -18,8 +18,8 @@ type Snapshot = { vehicles: Vehicle[]; moves: number };
 
 const GRID = 6;
 const CELL = 1;
-const ACTIVE_LEVEL_ID = 1;
-const ACTIVE_LEVEL = getLevel(ACTIVE_LEVEL_ID)!;
+let activeLevelId = 1;
+let activeLevel = getLevel(activeLevelId)!;
 const progress = loadProgress();
 const vehicleColors: Record<string, string> = {
   red: "#f04452", blue: "#3998f5", green: "#28b989",
@@ -29,11 +29,15 @@ const vehicleNames: Record<string, string> = {
   red: "Player car", blue: "Blue car", green: "Green van",
   yellow: "Yellow car", purple: "Purple car", orange: "Orange van"
 };
-const initialVehicles: Vehicle[] = ACTIVE_LEVEL.vehicles.map(vehicle => ({
+function vehiclesForLevel(levelId: number): Vehicle[] {
+  const level = getLevel(levelId)!;
+  return level.vehicles.map(vehicle => ({
   ...vehicle,
   name: vehicleNames[vehicle.id] ?? "Vehicle",
   color: vehicleColors[vehicle.id] ?? "#7c8da5"
-}));
+  }));
+}
+let initialVehicles: Vehicle[] = vehiclesForLevel(activeLevelId);
 
 const canvasHost = document.querySelector<HTMLDivElement>("#game-canvas")!;
 const statusMessage = document.querySelector<HTMLDivElement>("#status-message")!;
@@ -164,7 +168,7 @@ function finishIfSolved(): void {
   const target = vehicles.find(v => v.target);
   if (target && target.x + target.length >= GRID) {
     completed = true;
-    const updatedProgress = completeLevel(progress, ACTIVE_LEVEL_ID);
+    const updatedProgress = completeLevel(progress, activeLevelId, LEVELS.find(level => level.id > activeLevelId)?.id ?? activeLevelId);
     saveProgress(updatedProgress);
     winModal.classList.remove("hidden");
     setStatus("Road cleared! You did it.");
@@ -308,9 +312,12 @@ document.querySelector<HTMLButtonElement>("#undo-button")!.addEventListener("cli
 document.querySelector<HTMLButtonElement>("#reset-button")!.addEventListener("click", resetLevel);
 document.querySelector<HTMLButtonElement>("#replay-button")!.addEventListener("click", resetLevel);
 document.querySelector<HTMLButtonElement>("#next-button")!.addEventListener("click", () => {
-  winModal.classList.add("hidden");
-  resetLevel();
-  setStatus("More levels are being prepared. Your progress is saved on this device.");
+  const next = LEVELS.find(level => level.id > activeLevelId && level.id <= progress.highestUnlockedLevel);
+  if (next) selectLevel(next.id);
+  else {
+    winModal.classList.add("hidden");
+    setStatus("You have completed every playable level so far.");
+  }
 });
 document.querySelector<HTMLButtonElement>("#hint-button")!.addEventListener("click", () => {
   const solution = solvePuzzle(vehicles, GRID);
@@ -331,6 +338,51 @@ document.querySelector<HTMLButtonElement>("#hint-button")!.addEventListener("cli
     window.setTimeout(() => rebuildVehicles(), 1100);
   }
 });
+
+function selectLevel(levelId: number): void {
+  const level = getLevel(levelId);
+  if (!level || levelId > progress.highestUnlockedLevel) return;
+  activeLevelId = levelId;
+  activeLevel = level;
+  initialVehicles = vehiclesForLevel(levelId);
+  const number = document.querySelector<HTMLElement>("#level-number");
+  if (number) number.textContent = String(levelId).padStart(2, "0");
+  const meta = document.querySelector<HTMLElement>(".level-meta");
+  if (meta) meta.innerHTML = `<span class="level-dot"></span><span>WORLD ${level.world} — CITY STREETS</span><span class="difficulty">${level.difficulty.toUpperCase()}</span>`;
+  const title = document.querySelector<HTMLElement>(".intro h1");
+  if (title) title.innerHTML = `${level.title}<br /><span>Find your way out.</span>`;
+  renderLevelPicker();
+  resetLevel();
+}
+
+function renderLevelPicker(): void {
+  const picker = document.querySelector<HTMLDivElement>("#level-picker");
+  if (!picker) return;
+  picker.replaceChildren();
+  for (let id = 1; id <= 20; id++) {
+    const level = getLevel(id);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "level-tile";
+    button.textContent = String(id);
+    const unlocked = Boolean(level && id <= progress.highestUnlockedLevel);
+    button.disabled = !unlocked;
+    if (!level) {
+      button.classList.add("coming-soon");
+      button.title = "This level is not available yet";
+      button.setAttribute("aria-label", `Level ${id}, coming soon`);
+      button.textContent = "·";
+    } else {
+      if (id === activeLevelId) button.classList.add("selected");
+      if (progress.completedLevels.includes(id)) button.classList.add("completed");
+      button.setAttribute("aria-label", `Level ${id}: ${level.title}`);
+      button.addEventListener("click", () => selectLevel(id));
+    }
+    picker.append(button);
+  }
+  const note = document.querySelector<HTMLElement>("#level-picker-note");
+  if (note) note.textContent = `${LEVELS.length} of 100 planned levels are playable. Locked levels open as they are added and tested.`;
+}
 
 function resetLevel(): void {
   vehicles = structuredClone(initialVehicles);
