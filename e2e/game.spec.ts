@@ -1,4 +1,21 @@
 import { expect, test } from "@playwright/test";
+import * as THREE from "three";
+
+async function projectBoardPoint(page: import("@playwright/test").Page, worldX: number, worldZ: number) {
+  return page.locator("#game-canvas canvas").evaluate((canvas, point) => {
+    const rect = canvas.getBoundingClientRect();
+    const aspect = rect.width / Math.max(rect.height, 1);
+    const camera = new THREE.OrthographicCamera(-3.4 * aspect, 3.4 * aspect, 3.4, -3.4, 0.1, 100);
+    camera.position.set(8, 10, 9);
+    camera.lookAt(0, 0, 0);
+    camera.updateProjectionMatrix();
+    const projected = new THREE.Vector3(point.x, 0.31, point.z).project(camera);
+    return {
+      x: rect.left + (projected.x + 1) * rect.width / 2,
+      y: rect.top + (1 - projected.y) * rect.height / 2
+    };
+  }, { x: worldX, z: worldZ });
+}
 
 test("loads the game board and primary controls", async ({ page }) => {
   await page.goto("/");
@@ -115,3 +132,52 @@ test("world selector keeps later worlds locked until their first level is unlock
   }
 });
 
+test("moves the target vehicle with a real mouse drag", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium-desktop", "Mouse drag is covered on desktop only");
+  await page.goto("/");
+  const canvas = page.locator("#game-canvas canvas");
+  await expect(canvas).toBeVisible();
+  const start = await projectBoardPoint(page, -2, -0.5);
+  const end = await projectBoardPoint(page, -1, -0.5);
+  await page.mouse.move(start.x, start.y);
+  await page.mouse.down();
+  await page.mouse.move(end.x, end.y, { steps: 12 });
+  await page.mouse.up();
+  await expect(page.locator("#move-count")).toHaveText("1");
+  await expect(page.locator("#status-message")).toHaveText("Drag a vehicle to move it");
+  await page.locator("#undo-button").click();
+  await expect(page.locator("#move-count")).toHaveText("0");
+});
+
+test("moves the target vehicle with a touch drag on mobile", async ({ page, context }, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium-mobile", "Touch drag is covered on mobile only");
+  await page.goto("/");
+  const canvas = page.locator("#game-canvas canvas");
+  await expect(canvas).toBeVisible();
+  const start = await projectBoardPoint(page, -2, -0.5);
+  const end = await projectBoardPoint(page, -1, -0.5);
+  const session = await context.newCDPSession(page);
+  try {
+    await session.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [{ x: start.x, y: start.y, id: 1 }]
+    });
+    for (let step = 1; step <= 12; step++) {
+      await session.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{
+          x: start.x + (end.x - start.x) * step / 12,
+          y: start.y + (end.y - start.y) * step / 12,
+          id: 1
+        }]
+      });
+    }
+    await session.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  } finally {
+    await session.detach();
+  }
+  await expect(page.locator("#move-count")).toHaveText("1");
+  await expect(page.locator("#status-message")).toHaveText("Drag a vehicle to move it");
+  await page.locator("#undo-button").click();
+  await expect(page.locator("#move-count")).toHaveText("0");
+});
