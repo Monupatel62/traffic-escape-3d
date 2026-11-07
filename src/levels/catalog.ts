@@ -205,7 +205,8 @@ const highwayRushLevels: LevelDefinition[] = highwayRushTitles.map((title, index
     gridSize: 6,
     vehicles: [
       { id: "red", x: 0, y: 2, length: 2, axis: "horizontal", target: true },
-      ...blockers
+      ...blockers,
+      { id: "v7", x: (index % 3) * 2, y: 5, length: 2, axis: "horizontal" }
     ]
   };
 });
@@ -257,7 +258,8 @@ const downtownLevels: LevelDefinition[] = downtownTitles.map((title, index) => {
     gridSize: 6,
     vehicles: [
       { id: "red", x: 0, y: 2, length: 2, axis: "horizontal", target: true },
-      ...blockers
+      ...blockers,
+      { id: "v7", x: (index % 3) * 2, y: 5, length: 2, axis: "horizontal" }
     ]
   };
 });
@@ -309,7 +311,8 @@ const ultimateTrafficLevels: LevelDefinition[] = ultimateTrafficTitles.map((titl
     gridSize: 6,
     vehicles: [
       { id: "red", x: 0, y: 2, length: 2, axis: "horizontal", target: true },
-      ...blockers
+      ...blockers,
+      { id: "v7", x: (index % 3) * 2, y: 5, length: 2, axis: "horizontal" }
     ]
   };
 });
