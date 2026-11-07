@@ -7,9 +7,9 @@ describe("level catalog", () => {
     expect(validateLevelCatalog()).toEqual([]);
     expect(getLevel(1)).toBe(LEVELS[0]);
   });
-  it("contains twenty distinct playable puzzles in each of the first two worlds", () => {
-    expect(LEVELS).toHaveLength(40);
-    for (const world of [1, 2]) {
+  it("contains twenty distinct playable puzzles in each of the first three worlds", () => {
+    expect(LEVELS).toHaveLength(60);
+    for (const world of [1, 2, 3]) {
       const worldLevels = LEVELS.filter(level => level.world === world);
       expect(worldLevels).toHaveLength(20);
       expect(new Set(worldLevels.map(level => JSON.stringify(level.vehicles))).size).toBe(20);
@@ -26,6 +26,10 @@ describe("local progress", () => {
   it("unlocks World 2 after completing level 20", () => {
     expect(completeLevel({ highestUnlockedLevel: 20, completedLevels: [] }, 20, 21))
       .toEqual({ highestUnlockedLevel: 21, completedLevels: [20] });
+  });
+  it("unlocks World 3 after completing level 40", () => {
+    expect(completeLevel({ highestUnlockedLevel: 40, completedLevels: [] }, 40, 41))
+      .toEqual({ highestUnlockedLevel: 41, completedLevels: [40] });
   });
   it("loads a safe default when storage is unavailable", () => {
     const original = globalThis.localStorage;
