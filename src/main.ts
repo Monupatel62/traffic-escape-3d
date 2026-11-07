@@ -8,7 +8,7 @@ if ("serviceWorker" in navigator) {
 
 import * as THREE from "three";
 import "./style.css";
-import { canPlaceVehicle } from "./game/rules";
+import { canPlaceVehicle, canSlideVehicle, solvePuzzle } from "./game/rules";
 
 type Axis = "horizontal" | "vertical";
 type Vehicle = { id: string; name: string; x: number; y: number; length: number; axis: Axis; color: string; target?: boolean };
@@ -175,7 +175,7 @@ function moveVehicle(v: Vehicle, axisPosition: number): boolean {
     finishIfSolved();
     return true;
   }
-  if (!canPlace(v, x, y)) return false;
+  if (!canSlide(v, next)) return false;
   saveSnapshot();
   v.x = x; v.y = y;
   moves++;
@@ -229,7 +229,7 @@ function dragVehicle(event: PointerEvent): void {
   const next = Math.round(boardAxis);
   const x = v.axis === "horizontal" ? next : v.x;
   const y = v.axis === "vertical" ? next : v.y;
-  if (canPlace(v, x, y)) {
+  if (canSlide(v, next)) {
     const candidate = worldPosition({ ...v, x, y });
     mesh.position.x = candidate.x;
     mesh.position.z = candidate.z;
@@ -301,10 +301,16 @@ document.querySelector<HTMLButtonElement>("#next-button")!.addEventListener("cli
   setStatus("Level 2 is coming soon — prototype level reset");
 });
 document.querySelector<HTMLButtonElement>("#hint-button")!.addEventListener("click", () => {
-  setStatus("Hint: move the green van down one space to clear the red car's lane.");
-  const green = meshes.get("green");
-  if (green) {
-    green.traverse(object => {
+  const solution = solvePuzzle(vehicles, GRID);
+  const step = solution?.[0];
+  if (!step) { setStatus("No solution found for this board."); return; }
+  const hintedVehicle = vehicles.find(vehicle => vehicle.id === step.vehicleId);
+  if (!hintedVehicle) return;
+  const direction = step.to > (hintedVehicle.axis === "horizontal" ? hintedVehicle.x : hintedVehicle.y) ? "forward" : "backward";
+  setStatus(`Hint: slide the ${hintedVehicle.name.toLowerCase()} one space ${direction}.`);
+  const mesh = meshes.get(step.vehicleId);
+  if (mesh) {
+    mesh.traverse(object => {
       if (object instanceof THREE.Mesh && object.material instanceof THREE.MeshStandardMaterial) {
         object.material.emissive.set("#2be2a4");
         object.material.emissiveIntensity = 0.5;
