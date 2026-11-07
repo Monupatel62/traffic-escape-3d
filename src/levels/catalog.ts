@@ -153,8 +153,7 @@ const busyRoadLevels: LevelDefinition[] = busyRoadTitles.map((title, index) => {
       { id: "red", x: 0, y: 2, length: 2, axis: "horizontal", target: true },
       ...blockers,
       { id: "v7", x: topCarX, y: 0, length: 2, axis: "horizontal" },
-      { id: "v8", x: bottomCarX, y: 5, length: 2, axis: "horizontal" },
-      { id: "v9", x: (index % 3) * 2, y: 4, length: 2, axis: "horizontal" }
+      { id: "v8", x: bottomCarX, y: 5, length: 2, axis: "horizontal" }
     ]
   };
 });
