@@ -85,7 +85,7 @@ const extraLevels: LevelDefinition[] = extraLevelTitles.map((title, index) => {
     id: `v${blockerIndex}`,
     x: firstColumn + blockerIndex,
     y: blockerRow,
-    length: 2,
+    length: blockerLength,
     axis: "vertical"
   }));
   return {
@@ -132,7 +132,8 @@ const busyRoadLevels: LevelDefinition[] = busyRoadTitles.map((title, index) => {
   const id = index + 21;
   const blockerCount = 2 + (index % 2);
   const firstColumn = 2 + (index % (5 - blockerCount));
-  const blockerRow = index % 2 === 0 ? 1 : 2;
+  const blockerRow = index % 4 < 2 ? 1 : 2;
+  const blockerLength = Math.floor(index / 4) % 2 === 0 ? 2 : 3;
   const blockers: PuzzleVehicle[] = Array.from({ length: blockerCount }, (_, blockerIndex) => ({
     id: `v${blockerIndex}`,
     x: firstColumn + blockerIndex,
