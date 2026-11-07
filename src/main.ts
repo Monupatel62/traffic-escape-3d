@@ -51,8 +51,9 @@ const camera = new THREE.OrthographicCamera(-5.9, 5.9, 5.9, -5.9, 0.1, 100);
 camera.position.set(8, 10, 9);
 camera.lookAt(0, 0, 0);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+const isSmallScreen = window.matchMedia("(max-width: 650px)").matches;
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isSmallScreen ? 1.5 : 2));
 renderer.domElement.tabIndex = 0;
 renderer.domElement.setAttribute("aria-label", "Select a vehicle, then use arrow keys to move it. Press Escape to clear selection.");
 renderer.shadowMap.enabled = true;
@@ -342,6 +343,10 @@ function resize(): void {
   camera.updateProjectionMatrix();
 }
 window.addEventListener("resize", resize);
+if ("ResizeObserver" in window) {
+  const boardResizeObserver = new ResizeObserver(() => resize());
+  boardResizeObserver.observe(canvasHost);
+}
 resize();
 rebuildVehicles();
 
@@ -433,6 +438,8 @@ function renderLevelPicker(): void {
     }
     picker.append(button);
   }
+  const count = document.querySelector<HTMLElement>("#level-count");
+  if (count) count.textContent = `${LEVELS.length} playable`;
   const note = document.querySelector<HTMLElement>("#level-picker-note");
   if (note) note.textContent = `${LEVELS.length} of 100 planned levels are playable. Locked levels open as they are added and tested.`;
 }
