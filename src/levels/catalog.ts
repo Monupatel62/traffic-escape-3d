@@ -156,7 +156,8 @@ const busyRoadLevels: LevelDefinition[] = busyRoadTitles.map((title, index) => {
     ]
   };
 });
-\nexport const LEVELS: LevelDefinition[] = [
+
+export const LEVELS: LevelDefinition[] = [
   { id: 1, world: 1, title: "First Escape", difficulty: "Easy", gridSize: 6, vehicles: tutorialVehicles },
   { id: 2, world: 1, title: "One Block Away", difficulty: "Easy", gridSize: 6, vehicles: levelTwoVehicles },
   { id: 3, world: 1, title: "Double Trouble", difficulty: "Normal", gridSize: 6, vehicles: levelThreeVehicles },
