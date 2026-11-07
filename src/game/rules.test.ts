@@ -27,7 +27,17 @@ describe("puzzle movement rules", () => {
   it("finds a solution for the tutorial puzzle", () => {
     const solution = solvePuzzle(cars, 6);
     expect(solution).not.toBeNull();
-    expect(solution?.[0]).toEqual({ vehicleId: "blocker", to: 1 });
+    expect(solution?.length).toBeGreaterThan(0);
+    let state = cars.map(vehicle => ({ ...vehicle }));
+    for (const move of solution ?? []) {
+      const moving = state.find(vehicle => vehicle.id === move.vehicleId);
+      expect(moving).toBeDefined();
+      expect(canSlideVehicle(moving!, move.to, state, 6)).toBe(true);
+      state = state.map(vehicle => vehicle.id === move.vehicleId
+        ? { ...vehicle, x: vehicle.axis === "horizontal" ? move.to : vehicle.x, y: vehicle.axis === "vertical" ? move.to : vehicle.y }
+        : { ...vehicle });
+    }
+    expect(isTargetAtExit(state.find(vehicle => vehicle.target)!, 6)).toBe(true);
   });
   it("validates the tutorial board", () => expect(validatePuzzle(cars, 6)).toEqual([]));
   it("reports invalid overlapping boards", () => {
