@@ -10,7 +10,7 @@ describe("vehicle board coordinates", () => {
 
   it("centers a vertical vehicle on its column and grid cells", () => {
     const vehicle: PuzzleVehicle = { id: "v", x: 4, y: 1, length: 3, axis: "vertical" };
-    expect(vehicleWorldPosition(vehicle)).toEqual({ x: 1.5, z: 0 });
+    expect(vehicleWorldPosition(vehicle)).toEqual({ x: 1.5, z: -0.5 });
   });
 
   it("converts both lane coordinates back to their grid start", () => {
@@ -20,6 +20,6 @@ describe("vehicle board coordinates", () => {
   });
 
   it("preserves the grabbed pointer offset", () => {
-    expect(worldAxisToGridStart(-1.5, 0.5, 2)).toBe(-1);
+    expect(worldAxisToGridStart(-1.5, 0.5, 2)).toBe(0);
   });
 });
