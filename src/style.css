@@ -92,3 +92,9 @@ h1 span{color:#8ea9c9}
 .setting-row input{width:20px;height:20px;accent-color:#43d5a7}
 .settings-note{margin:14px 0 0;color:#9fb0c5;font-size:11px;line-height:1.6}
 @media(max-width:650px){.settings-button{margin-right:8px;padding:7px 9px;font-size:10px}.topbar{gap:5px}.settings-card{padding:30px 20px}}
+
+/* Pause controls and overlay */
+.pause-card h2{margin:0 0 10px;font-size:30px}
+.pause-actions{display:flex;flex-direction:column;gap:10px;margin-top:22px}
+.pause-actions button{min-height:44px;padding:0 18px;border:1px solid #ffffff22;border-radius:12px;font-weight:700;font-size:12px}
+@media(max-width:650px){.pause-actions{gap:8px}.pause-actions button{min-height:42px}}
