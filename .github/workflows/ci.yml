@@ -16,9 +16,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
       - name: Install dependencies
         run: npm install
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
       - name: Run unit tests
         run: npm test
+      - name: Run browser tests
+        run: npm run test:e2e
       - name: Build production bundle
         run: npm run build
