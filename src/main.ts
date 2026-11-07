@@ -175,7 +175,7 @@ function moveVehicle(v: Vehicle, axisPosition: number): boolean {
     finishIfSolved();
     return true;
   }
-  if (!canSlide(v, next)) return false;
+  if (!canSlideVehicle(v, next, vehicles, GRID)) return false;
   saveSnapshot();
   v.x = x; v.y = y;
   moves++;
@@ -229,7 +229,7 @@ function dragVehicle(event: PointerEvent): void {
   const next = Math.round(boardAxis);
   const x = v.axis === "horizontal" ? next : v.x;
   const y = v.axis === "vertical" ? next : v.y;
-  if (canSlide(v, next)) {
+  if (canSlideVehicle(v, next, vehicles, GRID)) {
     const candidate = worldPosition({ ...v, x, y });
     mesh.position.x = candidate.x;
     mesh.position.z = candidate.z;
