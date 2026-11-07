@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { LEVELS, getLevel, getPuzzleDifficulty, validateLevelCatalog } from "./catalog";
-import { completeLevel, loadProgress } from "./progress";
+import { completeLevel, loadProgress, saveProgress } from "./progress";
 
 describe("level catalog", () => {
   it("contains a valid, solvable tutorial level", () => {
@@ -78,4 +78,64 @@ describe("local progress", () => {
     expect(loadProgress()).toEqual({ highestUnlockedLevel: 1, completedLevels: [] });
     Object.defineProperty(globalThis, "localStorage", { configurable: true, value: original });
   });
+  it("sanitizes corrupted progress data and caps it at the final level", () => {
+    const original = globalThis.localStorage;
+    try {
+      Object.defineProperty(globalThis, "localStorage", {
+        configurable: true,
+        value: {
+          getItem: () => JSON.stringify({
+            highestUnlockedLevel: 999,
+            completedLevels: [1, 1, 2, -4, 0, 101, "3", 100]
+          })
+        }
+      });
+      expect(loadProgress()).toEqual({
+        highestUnlockedLevel: 100,
+        completedLevels: [1, 2, 100]
+      });
+    } finally {
+      Object.defineProperty(globalThis, "localStorage", { configurable: true, value: original });
+    }
+  });
+  it("returns a safe default when saved progress contains invalid JSON", () => {
+    const original = globalThis.localStorage;
+    try {
+      Object.defineProperty(globalThis, "localStorage", {
+        configurable: true,
+        value: { getItem: () => "{invalid json" }
+      });
+      expect(loadProgress()).toEqual({ highestUnlockedLevel: 1, completedLevels: [] });
+    } finally {
+      Object.defineProperty(globalThis, "localStorage", { configurable: true, value: original });
+    }
+  });
+  it("does not add invalid level IDs and completes a level idempotently", () => {
+    const initial = { highestUnlockedLevel: 1, completedLevels: [] };
+    expect(completeLevel(initial, 0)).toEqual(initial);
+    expect(completeLevel(initial, 101)).toEqual(initial);
+    expect(completeLevel(completeLevel(initial, 1), 1))
+      .toEqual({ highestUnlockedLevel: 2, completedLevels: [1] });
+  });
+  it("saves only normalized progress and tolerates unavailable storage", () => {
+    const original = globalThis.localStorage;
+    try {
+      let stored = "";
+      Object.defineProperty(globalThis, "localStorage", {
+        configurable: true,
+        value: { setItem: (_key: string, value: string) => { stored = value; } }
+      });
+      saveProgress({ highestUnlockedLevel: 999, completedLevels: [3, 3, 0, 101] });
+      expect(JSON.parse(stored)).toEqual({ highestUnlockedLevel: 100, completedLevels: [3] });
+
+      Object.defineProperty(globalThis, "localStorage", {
+        configurable: true,
+        value: { setItem: () => { throw new Error("storage blocked"); } }
+      });
+      expect(() => saveProgress({ highestUnlockedLevel: 2, completedLevels: [1] })).not.toThrow();
+    } finally {
+      Object.defineProperty(globalThis, "localStorage", { configurable: true, value: original });
+    }
+  });
+
 });
