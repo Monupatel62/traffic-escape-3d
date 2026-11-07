@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { LEVELS, getLevel, validateLevelCatalog } from "./catalog";
+import { LEVELS, getLevel, getPuzzleDifficulty, validateLevelCatalog } from "./catalog";
 import { completeLevel, loadProgress } from "./progress";
 
 describe("level catalog", () => {
@@ -14,6 +14,12 @@ describe("level catalog", () => {
       expect(worldLevels).toHaveLength(20);
       expect(new Set(worldLevels.map(level => JSON.stringify(level.vehicles))).size).toBe(20);
     }
+  });
+  it("labels difficulty from the solver's minimum slide count", () => {
+    for (const level of LEVELS) {
+      expect(level.difficulty).toBe(getPuzzleDifficulty(level.vehicles, level.gridSize));
+    }
+    expect(getPuzzleDifficulty([], 6)).toBe("Hard");
   });
   it("adds cross-traffic variety to the later worlds", () => {
     for (const world of [3, 4, 5]) {
