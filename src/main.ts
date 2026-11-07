@@ -568,7 +568,7 @@ function renderLevelPicker(): void {
   const count = document.querySelector<HTMLElement>("#level-count");
   if (count) count.textContent = `${LEVELS.filter(level => level.world === activeWorld).length} playable`;
   const note = document.querySelector<HTMLElement>("#level-picker-note");
-  if (note) note.textContent = `${LEVELS.length} of 100 planned levels are playable. Complete level 20 to unlock Busy Roads.`;
+  if (note) note.textContent = `${LEVELS.length} of 100 planned levels are playable. Complete level ${activeWorld * 20} to unlock ${worldNames[activeWorld + 1] ?? "the next world"}.`;
 }
 
 function resetLevel(): void {
