@@ -59,7 +59,7 @@ test("service worker installs and the app shell remains available offline", asyn
     const cachedAssets: string[] = [];
     for (const name of cacheNames) {
       const cache = await caches.open(name);
-      for (const asset of jsAssets) if (await cache.match(`/${asset.replace(/^\\//, "")}`)) cachedAssets.push(asset);
+      for (const asset of jsAssets) if (await cache.match("/" + asset)) cachedAssets.push(asset);
     }
     return { jsAssets, cachedAssets };
   });
